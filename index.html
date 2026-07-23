@@ -1,15 +1,171 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Memotest Pokémon</title>
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/estilos.css" />
 </head>
 
 <body>
+    <header class="encabezado">
+        <h1 class="encabezado-titulo">Memotest Pokémon</h1>
 
+        <nav class="navegacion">
+            <ul class="navegacion-lista">
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="index.html">Juego</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="pages/contacto.html">Contacto</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace"
+                        href="https://github.com/guille-nat/Guillermo_Natali_Maximiliano_Borachoc_Enzo_Cornejo_DAW_FINAL"
+                        target="_blank" rel="noopener">Repositorio</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="#" target="_blank" rel="noopener">Github Pages</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main class="contenido">
+        <!-- #! Contenido principal -->
+        <section class="inicio" id="pantallaInicio">
+            <!-- #! Pantalla de inicio -->
+            <h2 class="inicio-titulo">Comenzar partida</h2>
+            <article class="instrucciones">
+                <h3 class="instrucciones-titulo">¿Cómo se juega?</h3>
+                <ol class="instrucciones-lista">
+                    <li class="instrucciones-item">
+                        Ingresá tu nombre y elegí un nivel de dificultad.
+                    </li>
+                    <li class="instrucciones-item">
+                        Las cartas se mezclan y se muestran boca abajo.
+                    </li>
+                    <li class="instrucciones-item">
+                        Dá vuelta dos cartas por turno buscando los Pokémon iguales.
+                    </li>
+                    <li class="instrucciones-item">
+                        Si coinciden, quedan descubiertas y sumás puntos.
+                    </li>
+                    <li class="instrucciones-item">
+                        Si no coinciden, vuelven a ocultarse y perdés puntos.
+                    </li>
+                    <li class="instrucciones-item">
+                        Ganás cuando encontrás todos los pares del tablero.
+                    </li>
+                </ol>
+                <p class="instrucciones-nota">
+                    Cuanto menos tiempo y menos errores, mayor es tu puntaje final.
+                </p>
+            </article>
 
+            <!-- #! Formulario de inicio -->
+            <form class="formulario-inicio" id="formularioInicio">
+                <div class="campo">
+                    <label class="campo-etiqueta" for="nombreJugador">Nombre del entrenador</label>
+                    <input class="campo-entrada" id="nombreJugador" type="text" autocomplete="off" />
+                    <p class="campo-error oculto" id="errorNombre">
+                        El nombre debe tener al menos 3 caracteres.
+                    </p>
+                </div>
+                <div class="campo">
+                    <label class="campo-etiqueta" for="nivelDificultad">Nivel de dificultad</label>
+                    <select class="campo-entrada" id="nivelDificultad">
+                        <option value="">Elegí un nivel</option>
+                        <option value="facil">Fácil (4x4)</option>
+                        <option value="medio">Medio (4x5)</option>
+                        <option value="dificil">Difícil (6x6)</option>
+                    </select>
+                    <p class="campo-error oculto" id="errorNivel">
+                        Tenés que elegir un nivel de dificultad.
+                    </p>
+                </div>
+                <button class="boton boton-principal" id="botonJugar" type="submit">
+                    Jugar
+                </button>
+            </form>
+        </section>
+
+        <!-- #! Pantalla de partida -->
+        <section class="partida oculto" id="pantallaPartida">
+            <div class="marcadores">
+                <p class="marcador">
+                    Entrenador: <span class="marcador-valor" id="marcadorNombre"></span>
+                </p>
+                <p class="marcador">
+                    Nivel: <span class="marcador-valor" id="marcadorNivel"></span>
+                </p>
+                <p class="marcador">
+                    Intentos:
+                    <span class="marcador-valor" id="marcadorIntentos">0</span>
+                </p>
+                <p class="marcador">
+                    Pares: <span class="marcador-valor" id="marcadorPares">0</span>
+                </p>
+                <p class="marcador">
+                    Errores: <span class="marcador-valor" id="marcadorErrores">0</span>
+                </p>
+                <p class="marcador">
+                    Puntaje: <span class="marcador-valor" id="marcadorPuntaje">0</span>
+                </p>
+                <p class="marcador">
+                    Tiempo:
+                    <span class="marcador-valor" id="marcadorTiempo">00:00</span>
+                </p>
+            </div>
+            <div class="tablero" id="tablero"></div>
+            <div class="acciones">
+                <button class="boton boton-secundario" id="botonReiniciar" type="button">
+                    Reiniciar partida
+                </button>
+                <button class="boton boton-secundario" id="botonVolver" type="button">
+                    Cambiar nombre o nivel
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- #! Modal de resultado -->
+    <div class="modal oculto" id="modalResultado">
+        <div class="modal-contenido">
+            <h2 class="modal-titulo">¡Ganaste!</h2>
+            <ul class="modal-lista">
+                <li class="modal-item">
+                    Entrenador: <span id="resultadoNombre"></span>
+                </li>
+                <li class="modal-item">Nivel: <span id="resultadoNivel"></span></li>
+                <li class="modal-item">
+                    Intentos: <span id="resultadoIntentos"></span>
+                </li>
+                <li class="modal-item">
+                    Errores: <span id="resultadoErrores"></span>
+                </li>
+                <li class="modal-item">
+                    Tiempo total: <span id="resultadoTiempo"></span>
+                </li>
+                <li class="modal-item">
+                    Puntaje final: <span id="resultadoPuntaje"></span>
+                </li>
+            </ul>
+            <button class="boton boton-principal" id="botonJugarDeNuevo" type="button">
+                Jugar de nuevo
+            </button>
+        </div>
+    </div>
+    <footer class="pie">
+        <p class="pie-texto">
+            Guillermo Natali · Enzo Cornejo · Maximiliano Borachoc
+        </p>
+        <p class="pie-texto">Ingeniería en Sistemas Informáticos · UAI 2026</p>
+    </footer>
+    <script src="js/validaciones.js"></script>
+    <script src="js/juego.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
