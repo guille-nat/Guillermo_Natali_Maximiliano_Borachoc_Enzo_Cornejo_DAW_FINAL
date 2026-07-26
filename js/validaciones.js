@@ -23,7 +23,7 @@ function esNivelValido(nivel) {
     return false;
   }
 
-  for (indice = 0; indice < NIVELES_VALIDOS.length; indice = indice++) {
+  for (indice = 0; indice < NIVELES_VALIDOS.length; indice++) {
     if (NIVELES_VALIDOS[indice] === nivel) {
       return true;
     }
