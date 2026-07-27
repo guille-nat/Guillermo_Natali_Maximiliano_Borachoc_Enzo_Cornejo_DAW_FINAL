@@ -2,13 +2,21 @@
 var ID_TABLERO = "tablero";
 var ID_MARCADOR_NOMBRE = "marcadorNombre";
 var ID_MARCADOR_NIVEL = "marcadorNivel";
+var ID_MARCADOR_INTENTOS = "marcadorIntentos";
+var ID_MARCADOR_PARES = "marcadorPares";
+var ID_MARCADOR_ERRORES = "marcadorErrores";
 
 // Constantes con los elementos del CSS
 var CLASE_CARTA = "carta";
 var CLASE_CARTA_REVELADA = "carta-revelada";
+var CLASE_CARTA_CORRECTA = "carta-correcta";
+var CLASE_CARTA_INCORRECTA = "carta-incorrecta";
 
 // Texto alternativo mientras la carta todavía no fue revelada
 var TEXTO_ALT_OCULTA = "¿Quién es ese Pokémon?";
+
+// Tiempo de espera antes de volver a ocultar un par incorrecto.
+var MILISEGUNDOS_ESPERA_ERROR = 900;
 
 // Dirección de las imágenes
 var RUTA_IMAGENES = "assets/images/";
@@ -47,17 +55,30 @@ var CONFIGURACION_NIVELES = {
 var tablero;
 var marcadorNombre;
 var marcadorNivel;
+var marcadorIntentos;
+var marcadorPares;
+var marcadorErrores;
 
 // Datos de la partida en curso
 var nombreJugador;
 var nivelActual;
 var totalParesNivel;
+var cartasSeleccionadas;
+var carta1;
+var carta2;
+var tableroBloqueado;
+var contadorIntentos;
+var contadorPares;
+var contadorErrores;
 
 // Busca en el DOM los elementos que el juego necesita y los guarda en las variables globales
 function obtenerElementosJuego() {
   tablero = document.getElementById(ID_TABLERO);
   marcadorNombre = document.getElementById(ID_MARCADOR_NOMBRE);
   marcadorNivel = document.getElementById(ID_MARCADOR_NIVEL);
+  marcadorIntentos = document.getElementById(ID_MARCADOR_INTENTOS);
+  marcadorPares = document.getElementById(ID_MARCADOR_PARES);
+  marcadorErrores = document.getElementById(ID_MARCADOR_ERRORES);
 }
 
 // Mezcla los elementos de un array en orden aleatorio (algoritmo Fisher-Yates)
@@ -151,21 +172,114 @@ function construirTablero(nivel) {
   }
 }
 
+// Actualiza en la interfaz los valores de intentos, pares y errores
+function actualizarMarcadores() {
+  marcadorIntentos.textContent = contadorIntentos;
+  marcadorPares.textContent = contadorPares;
+  marcadorErrores.textContent = contadorErrores;
+}
+
+// Vuelve a cero todos los contadores para empezar o reiniciar una partida
+function reiniciarEstadoPartida() {
+  cartasSeleccionadas = [];
+  tableroBloqueado = false;
+  contadorIntentos = 0;
+  contadorPares = 0;
+  contadorErrores = 0;
+
+  actualizarMarcadores();
+}
+
+// Marca visualmente una carta como parte de un par correcto
+function bloquearCarta(carta) {
+  carta.classList.add(CLASE_CARTA_CORRECTA);
+}
+
+// Vuelve a mostrar la imagen boca abajo de una carta que no formó par
+function ocultarCartaIncorrecta(carta) {
+  var configuracion;
+
+  configuracion = CONFIGURACION_NIVELES[nivelActual];
+  carta.src = configuracion.imagenDorso;
+  carta.alt = TEXTO_ALT_OCULTA;
+
+  carta.classList.remove(CLASE_CARTA_REVELADA);
+  carta.classList.remove(CLASE_CARTA_INCORRECTA);
+}
+
+// Marca visualmente las dos cartas que no formaron un par correcto
+function marcarCartasIncorrectas() {
+  carta1.classList.add(CLASE_CARTA_INCORRECTA);
+  carta2.classList.add(CLASE_CARTA_INCORRECTA);
+}
+
+// Oculta el par incorrecto y desbloquea el tablero para seguir jugando
+function parIncorrecto() {
+  ocultarCartaIncorrecta(carta1);
+  ocultarCartaIncorrecta(carta2);
+  cartasSeleccionadas = [];
+  tableroBloqueado = false;
+}
+
+// Compara las dos cartas elegidas
+function compararCartasSeleccionadas() {
+  var coincideNombre;
+
+  carta1 = cartasSeleccionadas[0];
+  carta2 = cartasSeleccionadas[1];
+  coincideNombre = carta1.getAttribute("data-nombre") === carta2.getAttribute("data-nombre");
+
+  // Si coinciden suma el par
+  if (coincideNombre === true) {
+    bloquearCarta(carta1);
+    bloquearCarta(carta2);
+    contadorPares = contadorPares + 1;
+    cartasSeleccionadas = [];
+    tableroBloqueado = false;
+    actualizarMarcadores();
+    return;
+  }
+
+  // Si no coinciden suma el error y oculta las cartas
+  contadorErrores = contadorErrores + 1;
+  marcarCartasIncorrectas();
+  actualizarMarcadores();
+  setTimeout(parIncorrecto, MILISEGUNDOS_ESPERA_ERROR);
+}
+
 // Evento click sobre una carta
 function clickCarta(evento) {
   var carta;
 
   carta = evento.currentTarget;
 
+  if (tableroBloqueado === true) {
+    return;
+  }
+
   // Si la carta ya estaba revelada no hago nada
   if (carta.classList.contains(CLASE_CARTA_REVELADA) === true) {
     return;
   }
 
-  // Al dar vuelta la carta, muestro el nombre del Pokémon
+  // Si la carta ya estaba marcada como correcta no hago nada
+  if (carta.classList.contains(CLASE_CARTA_CORRECTA) === true) {
+    return;
+  }
+
   carta.src = carta.getAttribute("data-imagen");
   carta.alt = "Es " + carta.getAttribute("data-nombre");
   carta.classList.add(CLASE_CARTA_REVELADA);
+  cartasSeleccionadas.push(carta);
+
+  if (cartasSeleccionadas.length < 2) {
+    return;
+  }
+
+  contadorIntentos = contadorIntentos + 1;
+  actualizarMarcadores();
+  tableroBloqueado = true; // Bloquea el tablero mientras muestra las cartas a comparar
+  compararCartasSeleccionadas();
 }
 
 // Empieza una partida nueva con el nombre y nivel establecidos en el formulario
@@ -175,8 +289,15 @@ function iniciarPartida(nombre, nivel) {
 
   marcadorNombre.textContent = nombre;
   marcadorNivel.textContent = CONFIGURACION_NIVELES[nivel].etiqueta;
-
+  
+  reiniciarEstadoPartida();
   construirTablero(nivel);
+}
+
+// Reinicia la partida actual manteniendo el mismo nombre y nivel
+function reiniciarPartida() {
+  reiniciarEstadoPartida();
+  construirTablero(nivelActual);
 }
 
 // Busca los elementos del HTML al inicio
