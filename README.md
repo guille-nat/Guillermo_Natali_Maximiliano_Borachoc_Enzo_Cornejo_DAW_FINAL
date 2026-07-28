@@ -30,6 +30,17 @@ El objetivo es encontrar todos los pares en el menor tiempo posible, con la meno
 | Medio | 4x5 | 20 | 10 | Media |
 | Difícil | 6x6 | 36 | 18 | Alta |
 
+### Modo Elite
+
+Elite es un cuarto nivel, seleccionable desde el mismo formulario de inicio, con reglas propias:
+
+- El cronómetro es regresivo: inicia en 2:00 (120 segundos).
+- La partida no termina al completar un tablero: al encontrar todos los pares se pasa automáticamente al siguiente, sin recargar la página.
+- La progresión de tableros es: fácil (4x4) → medio (4x5) → difícil (6x6) → difícil (6x6) → difícil (6x6)... A partir del tercer tablero, todos los siguientes son de nivel difícil.
+- Cada par correcto suma 3 segundos al cronómetro.
+- Cada 10 errores acumulados restan 5 segundos del cronómetro.
+- La partida termina cuando el cronómetro llega a 0.
+
 ## Sistema de puntaje
 
 
@@ -50,6 +61,18 @@ puntaje = (pares × 100) - (errores × penalizacionDelNivel) - segundos + 300
 ```
 
 El puntaje se muestra y actualiza durante toda la partida, y nunca queda en valores incoherentes.
+
+### Puntaje en modo Elite
+
+Elite no usa la fórmula anterior: no penaliza por error ni por tiempo transcurrido los puntos, aunque sí penaliza por error el tiempo. En cambio:
+
+- Cada par correcto suma `15 × rondaActual` puntos. La ronda arranca en 1 (primer tablero, fácil) y sube en 1 cada vez que se pasa a un tablero nuevo, así que los pares valen cada vez más a medida que avanza la partida.
+- Cada vez que se completa un tablero difícil (6x6) se suman 150 puntos extra, sin importar cuántas veces se repita.
+
+```
+puntajePorPar = 15 × rondaActual
+puntajeFinal = suma de todos los pares encontrados + 150 por cada tablero difícil completado
+```
 
 
 ## Tecnologías

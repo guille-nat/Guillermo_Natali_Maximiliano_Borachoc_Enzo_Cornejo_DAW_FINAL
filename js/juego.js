@@ -1,3 +1,5 @@
+"use strict";
+
 // Constantes con los elementos del HTML
 var ID_TABLERO = "tablero";
 var ID_MARCADOR_NOMBRE = "marcadorNombre";
@@ -32,6 +34,15 @@ var MILISEGUNDOS_ESPERA_ERROR = 900;
 var PUNTOS_POR_PAR = 100;
 var BONUS_FINAL_PARTIDA = 300;
 
+// Configuración del modo Elite: cronómetro regresivo y puntaje propio
+var SEGUNDOS_INICIALES_ELITE = 120;
+var SEGUNDOS_BONUS_POR_PAR_ELITE = 3;
+var ERRORES_POR_PENALIZACION_TIEMPO_ELITE = 10;
+var SEGUNDOS_PENALIZACION_ELITE = 5;
+var PUNTOS_BASE_POR_PAR_ELITE = 15;
+var BONUS_TABLERO_DIFICIL_ELITE = 150;
+var SECUENCIA_NIVELES_ELITE = ["facil", "medio", "dificil"];
+
 // Dirección de las imágenes
 var RUTA_IMAGENES = "assets/images/";
 
@@ -62,7 +73,8 @@ var POKEMONES = [
 var CONFIGURACION_NIVELES = {
   facil: { etiqueta: "Fácil", columnas: 4, pares: 8, penalizacion: 10, claseTablero: "tablero-facil", imagenDorso: RUTA_IMAGENES + "pokebola.png" },
   medio: { etiqueta: "Medio", columnas: 4, pares: 10, penalizacion: 20, claseTablero: "tablero-medio", imagenDorso: RUTA_IMAGENES + "superbola.png" },
-  dificil: { etiqueta: "Difícil", columnas: 6, pares: 18, penalizacion: 30, claseTablero: "tablero-dificil", imagenDorso: RUTA_IMAGENES + "ultrabola.png" }
+  dificil: { etiqueta: "Difícil", columnas: 6, pares: 18, penalizacion: 30, claseTablero: "tablero-dificil", imagenDorso: RUTA_IMAGENES + "ultrabola.png" },
+  elite: { etiqueta: "Elite" }
 };
 
 // Referencias a los elementos del HTML (se completan en obtenerElementos)
@@ -99,6 +111,11 @@ var contadorPuntaje;
 var cronometroActivo;
 var idIntervaloCronometro;
 var segundosTranscurridos;
+
+// Datos del modo Elite
+var eliteEtapaActual;
+var eliteRondaActual;
+var segundosRestantesElite;
 
 // Busca en el DOM los elementos que el juego necesita y los guarda en las variables globales
 function obtenerElementosJuego() {
@@ -249,11 +266,67 @@ function calcularPuntaje() {
   return puntaje;
 }
 
+// Calcula los puntos que suma un par correcto en modo Elite: crecen con cada tablero superado
+function calcularPuntosParElite() {
+  return PUNTOS_BASE_POR_PAR_ELITE * eliteRondaActual;
+}
+
+// Refleja segundosRestantesElite en el marcador de tiempo, sin bajar de cero
+function actualizarMarcadorTiempoElite() {
+  if (segundosRestantesElite < 0) {
+    segundosRestantesElite = 0;
+  }
+
+  marcadorTiempo.textContent = formatearTiempo(segundosRestantesElite);
+}
+
+// Frena el cronómetro de la partida
+function detenerCronometro() {
+  clearInterval(idIntervaloCronometro);
+  cronometroActivo = false;
+}
+
+// Completa los datos del resultado final y muestra el modal
+function mostrarResultado() {
+  var configuracion;
+
+  configuracion = CONFIGURACION_NIVELES[nivelActual];
+
+  resultadoNombre.textContent = nombreJugador;
+  resultadoNivel.textContent = configuracion.etiqueta;
+  resultadoIntentos.textContent = contadorIntentos;
+  resultadoErrores.textContent = contadorErrores;
+  resultadoTiempo.textContent = formatearTiempo(segundosTranscurridos);
+  resultadoPuntaje.textContent = contadorPuntaje;
+
+  modalResultado.classList.remove(CLASE_OCULTO);
+}
+
+// Termina la partida del modo Elite cuando el cronómetro regresivo llega a cero
+function finalizarPartidaElite() {
+  segundosRestantesElite = 0;
+  marcadorTiempo.textContent = formatearTiempo(0);
+  detenerCronometro();
+  mostrarResultado();
+}
+
 // Se ejecuta cada segundo mientras el cronómetro está activo
 function actualizarCronometro() {
   segundosTranscurridos = segundosTranscurridos + 1;
-  marcadorTiempo.textContent = formatearTiempo(segundosTranscurridos);
-  contadorPuntaje = calcularPuntaje();
+
+  if (nivelActual === "elite") {
+    segundosRestantesElite = segundosRestantesElite - 1;
+    actualizarMarcadorTiempoElite();
+
+    if (segundosRestantesElite <= 0) {
+      finalizarPartidaElite();
+      return;
+    }
+  } else {
+    marcadorTiempo.textContent = formatearTiempo(segundosTranscurridos);
+    contadorPuntaje = calcularPuntaje();
+  }
+
   actualizarMarcadores();
 }
 
@@ -265,12 +338,6 @@ function iniciarCronometro() {
 
   cronometroActivo = true;
   idIntervaloCronometro = setInterval(actualizarCronometro, 1000);
-}
-
-// Frena el cronómetro de la partida
-function detenerCronometro() {
-  clearInterval(idIntervaloCronometro);
-  cronometroActivo = false;
 }
 
 // Vuelve a cero todos los contadores y el cronómetro para empezar o reiniciar una partida
@@ -292,11 +359,21 @@ function bloquearCarta(carta) {
   carta.classList.add(CLASE_CARTA_CORRECTA);
 }
 
+// Devuelve la configuración del tablero que está en pantalla: la del nivel elegido,
+// o la de la etapa actual cuando se está jugando en modo Elite
+function obtenerConfiguracionTableroActual() {
+  if (nivelActual === "elite") {
+    return CONFIGURACION_NIVELES[eliteEtapaActual];
+  }
+
+  return CONFIGURACION_NIVELES[nivelActual];
+}
+
 // Vuelve a mostrar la imagen boca abajo de una carta que no formó par
 function ocultarCartaIncorrecta(carta) {
   var configuracion;
 
-  configuracion = CONFIGURACION_NIVELES[nivelActual];
+  configuracion = obtenerConfiguracionTableroActual();
   carta.src = configuracion.imagenDorso;
   carta.alt = TEXTO_ALT_OCULTA;
 
@@ -331,25 +408,38 @@ function calcularPuntajeFinal() {
   return puntaje;
 }
 
-// Completa los datos del resultado final y muestra el modal
-function mostrarResultado() {
-  var configuracion;
+// Genera el siguiente tablero del modo Elite: suma el bonus si se completó un tablero
+// difícil y avanza a la siguiente etapa (facil -> medio -> dificil -> dificil...)
+function avanzarEtapaElite() {
+  var indiceSiguienteEtapa;
 
-  configuracion = CONFIGURACION_NIVELES[nivelActual];
+  if (eliteEtapaActual === "dificil") {
+    contadorPuntaje = contadorPuntaje + BONUS_TABLERO_DIFICIL_ELITE;
+  }
 
-  resultadoNombre.textContent = nombreJugador;
-  resultadoNivel.textContent = configuracion.etiqueta;
-  resultadoIntentos.textContent = contadorIntentos;
-  resultadoErrores.textContent = contadorErrores;
-  resultadoTiempo.textContent = formatearTiempo(segundosTranscurridos);
-  resultadoPuntaje.textContent = contadorPuntaje;
+  eliteRondaActual = eliteRondaActual + 1;
+  indiceSiguienteEtapa = eliteRondaActual - 1;
 
-  modalResultado.classList.remove(CLASE_OCULTO);
+  if (indiceSiguienteEtapa < SECUENCIA_NIVELES_ELITE.length) {
+    eliteEtapaActual = SECUENCIA_NIVELES_ELITE[indiceSiguienteEtapa];
+  }
+
+  contadorPares = 0;
+  cartasSeleccionadas = [];
+  tableroBloqueado = false;
+  actualizarMarcadores();
+  construirTablero(eliteEtapaActual);
 }
 
-// Revisa si ya se encontraron todos los pares del nivel y, si es así, termina la partida
+// Revisa si ya se encontraron todos los pares del tablero actual. En modo Elite eso
+// avanza al siguiente tablero; en el resto de los niveles, termina la partida
 function verificarFinDePartida() {
   if (contadorPares < totalParesNivel) {
+    return;
+  }
+
+  if (nivelActual === "elite") {
+    avanzarEtapaElite();
     return;
   }
 
@@ -371,7 +461,15 @@ function compararCartasSeleccionadas() {
     bloquearCarta(carta1);
     bloquearCarta(carta2);
     contadorPares = contadorPares + 1;
-    contadorPuntaje = calcularPuntaje();
+
+    if (nivelActual === "elite") {
+      contadorPuntaje = contadorPuntaje + calcularPuntosParElite();
+      segundosRestantesElite = segundosRestantesElite + SEGUNDOS_BONUS_POR_PAR_ELITE;
+      actualizarMarcadorTiempoElite();
+    } else {
+      contadorPuntaje = calcularPuntaje();
+    }
+
     cartasSeleccionadas = [];
     tableroBloqueado = false;
     actualizarMarcadores();
@@ -381,7 +479,16 @@ function compararCartasSeleccionadas() {
 
   // Si no coinciden suma el error y oculta las cartas
   contadorErrores = contadorErrores + 1;
-  contadorPuntaje = calcularPuntaje();
+
+  if (nivelActual === "elite") {
+    if (contadorErrores % ERRORES_POR_PENALIZACION_TIEMPO_ELITE === 0) {
+      segundosRestantesElite = segundosRestantesElite - SEGUNDOS_PENALIZACION_ELITE;
+      actualizarMarcadorTiempoElite();
+    }
+  } else {
+    contadorPuntaje = calcularPuntaje();
+  }
+
   marcarCartasIncorrectas();
   actualizarMarcadores();
   setTimeout(parIncorrecto, MILISEGUNDOS_ESPERA_ERROR);
@@ -426,6 +533,15 @@ function clickCarta(evento) {
   compararCartasSeleccionadas();
 }
 
+// Deja el modo Elite listo para empezar: ronda 1, etapa fácil y 120 segundos
+function prepararTableroInicialElite() {
+  eliteRondaActual = 1;
+  eliteEtapaActual = SECUENCIA_NIVELES_ELITE[0];
+  segundosRestantesElite = SEGUNDOS_INICIALES_ELITE;
+  marcadorTiempo.textContent = formatearTiempo(segundosRestantesElite);
+  construirTablero(eliteEtapaActual);
+}
+
 // Empieza una partida nueva con el nombre y nivel establecidos en el formulario
 function iniciarPartida(nombre, nivel) {
   nombreJugador = nombre;
@@ -433,8 +549,14 @@ function iniciarPartida(nombre, nivel) {
 
   marcadorNombre.textContent = nombre;
   marcadorNivel.textContent = CONFIGURACION_NIVELES[nivel].etiqueta;
-  
+
   reiniciarEstadoPartida();
+
+  if (nivel === "elite") {
+    prepararTableroInicialElite();
+    return;
+  }
+
   construirTablero(nivel);
 }
 
@@ -442,6 +564,12 @@ function iniciarPartida(nombre, nivel) {
 function reiniciarPartida() {
   detenerCronometro();
   reiniciarEstadoPartida();
+
+  if (nivelActual === "elite") {
+    prepararTableroInicialElite();
+    return;
+  }
+
   construirTablero(nivelActual);
 }
 

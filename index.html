@@ -62,6 +62,12 @@
                 <p class="instrucciones-nota">
                     Cuanto menos tiempo y menos errores, mayor es tu puntaje final.
                 </p>
+                <p class="instrucciones-nota">
+                    Nivel Elite: El jugador tiene 2 minutos para completar la partida. 
+                    Cada par correcto suma 3 segundos, sin embargo, cada 10 errores se restan 5 segundos. 
+                    Al completar un tablero se genera automáticamente uno nuevo.
+                    Cuanto mas pares encuentres, mayor es tu puntaje final.
+                </p>
             </article>
 
             <!-- #! Formulario de inicio -->
@@ -80,6 +86,7 @@
                         <option value="facil">Fácil (4x4)</option>
                         <option value="medio">Medio (4x5)</option>
                         <option value="dificil">Difícil (6x6)</option>
+                        <option value="elite">Elite (progresivo)</option>
                     </select>
                     <p class="campo-error oculto" id="errorNivel">
                         Tenés que elegir un nivel de dificultad.
