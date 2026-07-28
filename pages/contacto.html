@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacto - Memotest Pokemon</title>
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/estilos.css" />
+</head>
+
+<body>
+    <header class="encabezado">
+        <h1 class="encabezado-titulo">Memotest Pokemon</h1>
+
+        <nav class="navegacion">
+            <ul class="navegacion-lista">
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="../index.html">Juego</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="contacto.html">Contacto</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace"
+                        href="https://github.com/guille-nat/Guillermo_Natali_Maximiliano_Borachoc_Enzo_Cornejo_DAW_FINAL"
+                        target="_blank" rel="noopener">Repositorio</a>
+                </li>
+                <li class="navegacion-item">
+                    <a class="navegacion-enlace" href="#" target="_blank" rel="noopener">Github Pages</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="contenido">
+        <section class="inicio" id="pantallaContacto">
+            <h2 class="inicio-titulo">Contacto</h2>
+
+            <article class="instrucciones">
+                <h3 class="instrucciones-titulo">Escribinos tu consulta</h3>
+                <p class="instrucciones-nota">
+                    Completa el formulario y se abrira tu cliente de correo para enviar el mensaje.
+                </p>
+            </article>
+
+            <form class="formulario-inicio" id="formularioContacto">
+                <div class="campo">
+                    <label class="campo-etiqueta" for="contactoNombre">Nombre</label>
+                    <input class="campo-entrada" id="contactoNombre" type="text" autocomplete="name" />
+                    <p class="campo-error oculto" id="errorContactoNombre">
+                        El nombre debe ser alfanumerico.
+                    </p>
+                </div>
+
+                <div class="campo">
+                    <label class="campo-etiqueta" for="contactoMail">Mail</label>
+                    <input class="campo-entrada" id="contactoMail" type="email" autocomplete="email" />
+                    <p class="campo-error oculto" id="errorContactoMail">
+                        Ingresa un mail con formato valido.
+                    </p>
+                </div>
+
+                <div class="campo">
+                    <label class="campo-etiqueta" for="contactoMensaje">Mensaje</label>
+                    <textarea class="campo-entrada" id="contactoMensaje" rows="6"></textarea>
+                    <p class="campo-error oculto" id="errorContactoMensaje">
+                        El mensaje debe tener mas de 5 caracteres.
+                    </p>
+                </div>
+
+                <button class="boton boton-principal" type="submit">
+                    Enviar consulta
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="pie">
+        <p class="pie-texto">
+            Guillermo Natali - Enzo Cornejo - Maximiliano Borachoc
+        </p>
+        <p class="pie-texto">Ingenieria en Sistemas Informaticos - UAI 2026</p>
+    </footer>
+
+    <script src="../js/validaciones.js"></script>
+</body>
+
+</html>
