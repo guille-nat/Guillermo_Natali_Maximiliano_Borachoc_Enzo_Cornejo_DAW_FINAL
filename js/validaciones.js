@@ -2,7 +2,7 @@
 
 var CLASE_OCULTO = "oculto";
 var LARGO_MINIMO_NOMBRE = 3;
-var NIVELES_VALIDOS = ["facil", "medio", "dificil"];
+var NIVELES_VALIDOS = ["facil", "medio", "dificil", "elite"];
 
 function esNombreValido(nombre) {
   var nombreLimpio;
