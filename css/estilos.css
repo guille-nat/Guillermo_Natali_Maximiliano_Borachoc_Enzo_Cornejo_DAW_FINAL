@@ -77,11 +77,12 @@ button:disabled {
 
 .encabezado-titulo {
   margin: 0;
-  color: var(--color-amarillo);
-  font-size: 2rem;
-  line-height: 1.1;
-  letter-spacing: 0;
-  text-shadow: 0.12rem 0.12rem 0 var(--color-azul);
+}
+
+.encabezado-logo {
+  height: 3rem;
+  width: auto;
+  display: block;
 }
 
 .navegacion {
@@ -573,8 +574,8 @@ button:disabled {
 }
 
 @media (max-width: 34rem) {
-  .encabezado-titulo {
-    font-size: 1.65rem;
+  .encabezado-logo {
+    height: 2.25rem;
   }
 
   .navegacion-lista,
