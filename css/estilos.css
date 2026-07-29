@@ -357,6 +357,16 @@ button:disabled {
   width: min(100%, 42rem, 62vh);
 }
 
+.control-audio {
+  width: 100%;
+  max-width: 24rem;
+  margin: 0 auto;
+}
+
+.control-audio audio {
+  width: 100%;
+}
+
 .carta {
   position: relative;
   width: 100%;
