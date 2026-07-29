@@ -94,11 +94,19 @@ function manejarVueltaAlInicio() {
   mostrarPantallaInicio();
 }
 
+// Cierra el modal de resultado si el click fue sobre el fondo oscuro, no sobre su contenido
+function manejarClickFueraDeModalResultado(evento) {
+  if (evento.target === evento.currentTarget) {
+    ocultarElemento(modalResultado);
+  }
+}
+
 function asignarEventos() {
   formularioInicio.addEventListener("submit", manejarEnvioFormulario);
   botonReiniciar.addEventListener("click", manejarReinicio);
   botonVolver.addEventListener("click", manejarVueltaAlInicio);
   botonJugarDeNuevo.addEventListener("click", manejarReinicio);
+  modalResultado.addEventListener("click", manejarClickFueraDeModalResultado);
 }
 
 function obtenerElementos() {

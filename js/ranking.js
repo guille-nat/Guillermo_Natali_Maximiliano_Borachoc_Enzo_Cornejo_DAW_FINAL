@@ -218,6 +218,13 @@ function crearBoton(texto, claseBoton, idBoton) {
   return boton;
 }
 
+// Cierra el modal si el click fue sobre el fondo oscuro, no sobre su contenido
+function manejarClickFueraDelModal(evento) {
+  if (evento.target === evento.currentTarget) {
+    evento.currentTarget.classList.add(CLASE_OCULTO_RANKING);
+  }
+}
+
 function crearModalRanking() {
   var modal;
   var contenido;
@@ -230,6 +237,7 @@ function crearModalRanking() {
   modal = document.createElement("div");
   modal.className = "modal oculto";
   modal.id = ID_MODAL_RANKING;
+  modal.addEventListener("click", manejarClickFueraDelModal);
 
   contenido = document.createElement("div");
   contenido.className = "modal-contenido";
@@ -239,7 +247,7 @@ function crearModalRanking() {
   titulo.textContent = "Ranking";
 
   lista = document.createElement("ul");
-  lista.className = "modal-lista";
+  lista.className = "modal-lista modal-lista-ranking";
   lista.id = ID_CONTENIDO_RANKING;
 
   acciones = document.createElement("div");
@@ -269,6 +277,7 @@ function crearModalConfirmacionRanking() {
   modal = document.createElement("div");
   modal.className = "modal oculto";
   modal.id = ID_MODAL_CONFIRMAR_RANKING;
+  modal.addEventListener("click", manejarClickFueraDelModal);
 
   contenido = document.createElement("div");
   contenido.className = "modal-contenido";
