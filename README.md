@@ -75,6 +75,21 @@ puntajeFinal = suma de todos los pares encontrados + 150 por cada tablero difíc
 ```
 
 
+## Funcionalidades implementadas
+
+- Tablero generado dinámicamente, con mezcla aleatoria de cartas en cada partida.
+- Cuatro niveles de dificultad: Fácil, Medio, Difícil y Elite.
+- Validación del nombre del jugador y nivel elegido.
+- Comparación de pares de cartas con estados visuales distintos para carta revelada, correcta e incorrecta.
+- Cronómetro de partida (ascendente en los niveles normales, regresivo en Elite) y sistema de puntaje con fórmula propia para cada modalidad.
+- Modal de resultado final con nombre, nivel, intentos, errores, tiempo total y puntaje.
+- Reinicio de partida y cambio de nombre/nivel sin recargar la página.
+- Ranking de partidas guardado en LocalStorage, con listado expandible por partida, ordenamiento por Puntaje/Fecha/Duración/Nivel en forma ascendente o descendente, y borrado de historial con confirmación mediante modal propio.
+- Reproductor de audio personalizado según nivel de dificultad.
+- Modales cerrables haciendo clic fuera de su contenido, además de sus botones de acción.
+- Página de contacto con formulario validado por JavaScript, que abre el cliente de correo del usuario al enviarse correctamente.
+- Diseño responsive con Flexbox para desktop, tablet y mobile.
+
 ## Tecnologías
 
 - HTML5
@@ -86,7 +101,7 @@ puntajeFinal = suma de todos los pares encontrados + 150 por cada tablero difíc
 ```
 /assets
   /images
-  /sounds
+  /audio
 /css
   reset.css
   estilos.css
@@ -95,6 +110,8 @@ puntajeFinal = suma de todos los pares encontrados + 150 por cada tablero difíc
   juego.js
   validaciones.js
   almacenamiento.js
+  ranking.js
+  audio.js
 /pages
   contacto.html
 index.html
