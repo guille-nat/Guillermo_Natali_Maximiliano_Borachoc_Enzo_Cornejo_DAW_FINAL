@@ -81,6 +81,7 @@ button:disabled {
 
 .encabezado-logo {
   height: 3rem;
+  max-width: 100%;
   width: auto;
   display: block;
 }
@@ -368,6 +369,10 @@ button:disabled {
   width: 100%;
 }
 
+.pie-texto {
+  max-width: 60rem;
+}
+
 .carta {
   position: relative;
   width: 100%;
@@ -543,7 +548,7 @@ button:disabled {
   text-align: center;
 }
 
-@media (max-width: 56rem) {
+@media (max-width: 991px) {
   .encabezado {
     flex-direction: column;
     align-items: stretch;
@@ -567,15 +572,56 @@ button:disabled {
     font-size: 2rem;
   }
 
+  .marcadores {
+    justify-content: stretch;
+  }
+
   .marcador {
-    flex: 1 1 10rem;
+    flex: 1 1 calc(50% - 0.75rem);
+  }
+
+  .tablero,
+  .tablero-medio,
+  .tablero-dificil {
+    width: min(100%, 32rem);
   }
 
 }
 
-@media (max-width: 34rem) {
+@media (max-width: 767px) {
+  .contenido {
+    padding: 1rem;
+  }
+
+  .inicio-titulo {
+    font-size: 1.85rem;
+  }
+
+  .instrucciones,
+  .formulario-inicio,
+  .modal-contenido {
+    padding: 1.1rem;
+  }
+
+  .tablero,
+  .tablero-medio,
+  .tablero-dificil {
+    width: min(100%, 28rem);
+  }
+}
+
+@media (max-width: 575px) {
+  .encabezado {
+    gap: 1rem;
+    padding: 0.9rem;
+  }
+
   .encabezado-logo {
     height: 2.25rem;
+  }
+
+  .navegacion-item {
+    width: 100%;
   }
 
   .navegacion-lista,
@@ -608,21 +654,22 @@ button:disabled {
   }
 
   .marcador {
+    flex-basis: 100%;
     min-width: 0;
   }
 
   .tablero {
-    width: min(100%, 74vw, 43vh);
+    width: min(100%, 22rem);
     padding: 0.35rem;
     gap: 0.25rem;
   }
 
   .tablero-medio {
-    width: min(100%, 68vw, 34vh);
+    width: min(100%, 20rem);
   }
 
   .tablero-dificil {
-    width: min(100%, 86vw, 43vh);
+    width: min(100%, 22rem);
   }
 
   .pie {
