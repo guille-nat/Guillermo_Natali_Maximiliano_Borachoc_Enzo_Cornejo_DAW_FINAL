@@ -508,8 +508,42 @@ button:disabled {
   overflow-y: auto;
 }
 
-.modal-lista-ranking > li {
+.ranking-item {
   flex-shrink: 0;
+  border-radius: 0.4rem;
+  background: var(--color-humo);
+  overflow: hidden;
+}
+
+.ranking-fila {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  background: none;
+  color: var(--color-tinta-suave);
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ranking-fila:hover,
+.ranking-fila:focus-visible {
+  background: var(--color-borde);
+}
+
+.ranking-detalle {
+  padding: 0.4rem 0.75rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: var(--color-borde);
+}
+
+.ranking-detalle .modal-item {
+  padding: 0.15rem 0;
+  background: none;
+  border-radius: 0;
 }
 
 .modal-titulo {

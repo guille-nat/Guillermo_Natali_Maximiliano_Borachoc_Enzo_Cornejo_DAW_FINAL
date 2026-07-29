@@ -121,21 +121,74 @@ function mostrarRankingVacio(contenidoRanking) {
   contenidoRanking.appendChild(mensaje);
 }
 
+// Fila corta y clickeable: "1. Entrenador — 100 pts"
+function crearFilaResumenRanking(partida, posicion) {
+  var fila;
+
+  fila = document.createElement("button");
+  fila.type = "button";
+  fila.className = "ranking-fila";
+  fila.setAttribute("aria-expanded", "false");
+  fila.textContent = posicion + ". " + partida.nombre + " — " + partida.puntaje + " pts";
+
+  return fila;
+}
+
+// Detalle completo de la partida, oculto hasta que se despliega la fila
+function crearDetalleRanking(partida) {
+  var detalle;
+
+  detalle = document.createElement("div");
+  detalle.className = "ranking-detalle oculto";
+
+  detalle.appendChild(crearElementoTexto("Nivel", partida.nivel));
+  detalle.appendChild(crearElementoTexto("Intentos", partida.intentos));
+  detalle.appendChild(crearElementoTexto("Errores", partida.errores));
+  detalle.appendChild(crearElementoTexto("Duracion", partida.duracion));
+  detalle.appendChild(crearElementoTexto("Fecha y hora", partida.fechaHora));
+
+  return detalle;
+}
+
+function alternarDetalleRanking(evento) {
+  var fila;
+  var detalle;
+  var estaExpandido;
+
+  fila = evento.currentTarget;
+  detalle = fila.nextElementSibling;
+
+  if (detalle === null) {
+    return;
+  }
+
+  estaExpandido = detalle.classList.contains(CLASE_OCULTO_RANKING) === false;
+
+  if (estaExpandido === true) {
+    detalle.classList.add(CLASE_OCULTO_RANKING);
+    fila.setAttribute("aria-expanded", "false");
+    return;
+  }
+
+  detalle.classList.remove(CLASE_OCULTO_RANKING);
+  fila.setAttribute("aria-expanded", "true");
+}
+
 function agregarPartidaAlRanking(contenidoRanking, partida, posicion) {
   var item;
+  var fila;
+  var detalle;
 
   item = document.createElement("li");
-  item.className = "modal-item";
+  item.className = "ranking-item";
 
-  item.appendChild(crearElementoTexto("Puesto", posicion));
-  item.appendChild(crearElementoTexto("Entrenador", partida.nombre));
-  item.appendChild(crearElementoTexto("Puntaje", partida.puntaje));
-  item.appendChild(crearElementoTexto("Nivel", partida.nivel));
-  item.appendChild(crearElementoTexto("Intentos", partida.intentos));
-  item.appendChild(crearElementoTexto("Errores", partida.errores));
-  item.appendChild(crearElementoTexto("Duracion", partida.duracion));
-  item.appendChild(crearElementoTexto("Fecha y hora", partida.fechaHora));
+  fila = crearFilaResumenRanking(partida, posicion);
+  fila.addEventListener("click", alternarDetalleRanking);
 
+  detalle = crearDetalleRanking(partida);
+
+  item.appendChild(fila);
+  item.appendChild(detalle);
   contenidoRanking.appendChild(item);
 }
 
