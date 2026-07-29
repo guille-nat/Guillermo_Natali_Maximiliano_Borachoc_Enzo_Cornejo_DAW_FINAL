@@ -5,12 +5,30 @@ var ID_MODAL_RESULTADO_RANKING = "modalResultado";
 var ID_BOTON_RANKING = "botonRanking";
 var ID_MODAL_RANKING = "modalRanking";
 var ID_CONTENIDO_RANKING = "contenidoRanking";
+var ID_SELECTOR_ORDEN_RANKING = "selectorOrdenRanking";
+var ID_BOTON_DIRECCION_ORDEN_RANKING = "botonDireccionOrdenRanking";
 var ID_BOTON_CERRAR_RANKING = "botonCerrarRanking";
 var ID_BOTON_BORRAR_RANKING = "botonBorrarRanking";
 var ID_MODAL_CONFIRMAR_RANKING = "modalConfirmarRanking";
 var ID_BOTON_CONFIRMAR_BORRADO_RANKING = "botonConfirmarBorradoRanking";
 var ID_BOTON_CANCELAR_BORRADO_RANKING = "botonCancelarBorradoRanking";
+
+// Criterios disponibles para ordenar el ranking
+var CRITERIO_ORDEN_PUNTAJE = "puntaje";
+var CRITERIO_ORDEN_FECHA = "fecha";
+var CRITERIO_ORDEN_DURACION = "duracion";
+var CRITERIO_ORDEN_NIVEL = "nivel";
+var ORDEN_NIVELES_RANKING = ["Fácil", "Medio", "Difícil", "Elite"];
+
+// Dirección del ordenamiento, independiente del criterio elegido
+var DIRECCION_ORDEN_ASCENDENTE = "asc";
+var DIRECCION_ORDEN_DESCENDENTE = "desc";
+var SIMBOLO_ORDEN_ASCENDENTE = "↑";
+var SIMBOLO_ORDEN_DESCENDENTE = "↓";
+
 var ultimaFirmaResultadoRanking = "";
+var criterioOrdenActual = CRITERIO_ORDEN_PUNTAJE;
+var direccionOrdenActual = DIRECCION_ORDEN_DESCENDENTE;
 
 function obtenerTextoResultado(idElemento) {
   var elemento;
@@ -24,10 +42,47 @@ function obtenerTextoResultado(idElemento) {
   return elemento.textContent.trim();
 }
 
-function ordenarRankingPorPuntaje(ranking) {
-  ranking.sort(function (partidaA, partidaB) {
-    return partidaB.puntaje - partidaA.puntaje;
-  });
+// A partir de acá, los comparadores ordenan siempre ascendente;
+// la dirección descendente se aplica invirtiendo el arreglo ya ordenado
+function compararPorPuntaje(partidaA, partidaB) {
+  return partidaA.puntaje - partidaB.puntaje;
+}
+
+function compararPorFecha(partidaA, partidaB) {
+  return partidaA.marcaTiempo - partidaB.marcaTiempo;
+}
+
+// duracion es texto "mm:ss" con ceros a la izquierda, por eso se compara como string
+function compararPorDuracion(partidaA, partidaB) {
+  if (partidaA.duracion < partidaB.duracion) {
+    return -1;
+  }
+
+  if (partidaA.duracion > partidaB.duracion) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function compararPorNivel(partidaA, partidaB) {
+  return ORDEN_NIVELES_RANKING.indexOf(partidaA.nivel) - ORDEN_NIVELES_RANKING.indexOf(partidaB.nivel);
+}
+
+function ordenarRanking(ranking, criterio, direccion) {
+  if (criterio === CRITERIO_ORDEN_FECHA) {
+    ranking.sort(compararPorFecha);
+  } else if (criterio === CRITERIO_ORDEN_DURACION) {
+    ranking.sort(compararPorDuracion);
+  } else if (criterio === CRITERIO_ORDEN_NIVEL) {
+    ranking.sort(compararPorNivel);
+  } else {
+    ranking.sort(compararPorPuntaje);
+  }
+
+  if (direccion === DIRECCION_ORDEN_DESCENDENTE) {
+    ranking.reverse();
+  }
 
   return ranking;
 }
@@ -47,6 +102,7 @@ function crearPartidaDesdeResultado() {
     intentos: parseInt(obtenerTextoResultado("resultadoIntentos"), 10),
     errores: parseInt(obtenerTextoResultado("resultadoErrores"), 10),
     fechaHora: new Date().toLocaleString("es-AR"),
+    marcaTiempo: Date.now(),
     duracion: obtenerTextoResultado("resultadoTiempo")
   };
 
@@ -203,7 +259,7 @@ function renderizarRanking() {
     return;
   }
 
-  ranking = ordenarRankingPorPuntaje(obtenerRankingGuardado());
+  ranking = ordenarRanking(obtenerRankingGuardado(), criterioOrdenActual, direccionOrdenActual);
 
   if (ranking.length === 0) {
     mostrarRankingVacio(contenidoRanking);
@@ -278,10 +334,46 @@ function manejarClickFueraDelModal(evento) {
   }
 }
 
+function agregarOpcionOrden(selector, etiqueta, valor) {
+  var opcion;
+
+  opcion = document.createElement("option");
+  opcion.value = valor;
+  opcion.textContent = etiqueta;
+
+  selector.appendChild(opcion);
+}
+
+function manejarCambioOrdenRanking(evento) {
+  criterioOrdenActual = evento.target.value;
+  renderizarRanking();
+}
+
+// Alterna entre ascendente y descendente, sin importar el criterio elegido
+function alternarDireccionOrden() {
+  var boton;
+
+  boton = document.getElementById(ID_BOTON_DIRECCION_ORDEN_RANKING);
+
+  if (direccionOrdenActual === DIRECCION_ORDEN_DESCENDENTE) {
+    direccionOrdenActual = DIRECCION_ORDEN_ASCENDENTE;
+    boton.textContent = SIMBOLO_ORDEN_ASCENDENTE;
+  } else {
+    direccionOrdenActual = DIRECCION_ORDEN_DESCENDENTE;
+    boton.textContent = SIMBOLO_ORDEN_DESCENDENTE;
+  }
+
+  renderizarRanking();
+}
+
 function crearModalRanking() {
   var modal;
   var contenido;
   var titulo;
+  var contenedorOrden;
+  var etiquetaOrden;
+  var selectorOrden;
+  var botonDireccion;
   var lista;
   var acciones;
   var botonBorrar;
@@ -299,6 +391,30 @@ function crearModalRanking() {
   titulo.className = "modal-titulo";
   titulo.textContent = "Ranking";
 
+  contenedorOrden = document.createElement("div");
+  contenedorOrden.className = "ranking-orden";
+
+  etiquetaOrden = document.createElement("span");
+  etiquetaOrden.className = "ranking-orden-etiqueta";
+  etiquetaOrden.textContent = "Ordenar por:";
+
+  selectorOrden = document.createElement("select");
+  selectorOrden.className = "campo-entrada";
+  selectorOrden.id = ID_SELECTOR_ORDEN_RANKING;
+  selectorOrden.setAttribute("aria-label", "Ordenar ranking por");
+
+  agregarOpcionOrden(selectorOrden, "Puntaje", CRITERIO_ORDEN_PUNTAJE);
+  agregarOpcionOrden(selectorOrden, "Fecha", CRITERIO_ORDEN_FECHA);
+  agregarOpcionOrden(selectorOrden, "Duracion", CRITERIO_ORDEN_DURACION);
+  agregarOpcionOrden(selectorOrden, "Nivel", CRITERIO_ORDEN_NIVEL);
+
+  botonDireccion = crearBoton(SIMBOLO_ORDEN_DESCENDENTE, "boton boton-secundario", ID_BOTON_DIRECCION_ORDEN_RANKING);
+  botonDireccion.setAttribute("aria-label", "Invertir orden ascendente o descendente");
+
+  contenedorOrden.appendChild(etiquetaOrden);
+  contenedorOrden.appendChild(selectorOrden);
+  contenedorOrden.appendChild(botonDireccion);
+
   lista = document.createElement("ul");
   lista.className = "modal-lista modal-lista-ranking";
   lista.id = ID_CONTENIDO_RANKING;
@@ -312,6 +428,7 @@ function crearModalRanking() {
   acciones.appendChild(botonBorrar);
   acciones.appendChild(botonCerrar);
   contenido.appendChild(titulo);
+  contenido.appendChild(contenedorOrden);
   contenido.appendChild(lista);
   contenido.appendChild(acciones);
   modal.appendChild(contenido);
@@ -378,6 +495,8 @@ function asignarEventosRanking() {
   document.getElementById(ID_BOTON_BORRAR_RANKING).addEventListener("click", pedirConfirmacionBorradoRanking);
   document.getElementById(ID_BOTON_CANCELAR_BORRADO_RANKING).addEventListener("click", manejarCierreConfirmacionBorrado);
   document.getElementById(ID_BOTON_CONFIRMAR_BORRADO_RANKING).addEventListener("click", borrarHistorialRanking);
+  document.getElementById(ID_SELECTOR_ORDEN_RANKING).addEventListener("change", manejarCambioOrdenRanking);
+  document.getElementById(ID_BOTON_DIRECCION_ORDEN_RANKING).addEventListener("click", alternarDireccionOrden);
 }
 
 function manejarCambioModalResultado() {

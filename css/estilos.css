@@ -508,6 +508,23 @@ button:disabled {
   overflow-y: auto;
 }
 
+.ranking-orden {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ranking-orden-etiqueta {
+  color: var(--color-azul-profundo);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ranking-orden .campo-entrada {
+  width: auto;
+  flex: 1;
+}
+
 .ranking-item {
   flex-shrink: 0;
   border-radius: 0.4rem;
